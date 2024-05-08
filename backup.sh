@@ -16,6 +16,11 @@ ERROR_ENVOI_FICHIER_DRIVE=111
 ERROR_FREQUENCE_SAUV_AUTO_NON_VALIDE=112
 ERROR_AUCUNE_METHODE_SAUV_SPECIFIEE=113
 
+# Info Codes
+INFO_UPLOAD_SUCCESS=400
+INFO_UPLOAD_SUCCESS_MESSAGE="Toutes les opérations d'upload vers Google Drive ont été effectuées avec succès."
+
+
 # Variables
 manual_backup=false
 automatic_backup=false
@@ -48,46 +53,46 @@ error_message() {
     local error_code=$1
     case $error_code in
         $ERROR_OPTION_NON_EXISTANTE)
-            echo "Erreur ($ERROR_OPTION_NON_EXISTANTE): Option saisie non existante."
+            echo "Option saisie non existante."
             ;;
         $ERROR_PARAMETRE_OBLIGATOIRE_MANQUANT)
-            echo "Erreur ($ERROR_PARAMETRE_OBLIGATOIRE_MANQUANT): Paramètre obligatoire manquant."
+            echo "Paramètre obligatoire manquant."
             ;;
         $ERROR_ERREUR_INCONNUE)
             echo "Erreur inconnue."
             ;;
         $ERROR_ECRITURE_FICHIER_JOURNAL)
-            echo "Erreur ($ERROR_ECRITURE_FICHIER_JOURNAL): Erreur lors de l'écriture dans le fichier journal."
+            echo "Erreur lors de l'écriture dans le fichier journal."
             ;;
         $ERROR_EXECUTION_SCRIPT_NON_ROOT)
-            echo "Erreur ($ERROR_EXECUTION_SCRIPT_NON_ROOT): Le script doit être exécuté avec sudo ou en tant qu'utilisateur root."
+            echo "Le script doit être exécuté avec sudo ou en tant qu'utilisateur root."
             ;;
         $ERROR_OPTION_P_NON_C)
-            echo "Erreur ($ERROR_OPTION_P_NON_C): L'option -p ne peut être utilisée que si l'option -c est spécifiée."
+            echo "L'option -p ne peut être utilisée que si l'option -c est spécifiée."
             ;;
         $ERROR_OPTION_NON_VALIDE)
-            echo "Erreur ($ERROR_OPTION_NON_VALIDE): Option non valide."
+            echo "Option non valide."
             ;;
         $ERROR_MANUEL_SOURCE_N_OMISSION)
-            echo "Erreur ($ERROR_MANUEL_SOURCE_N_OMISSION): Pour une sauvegarde manuelle, les options -s et -n sont obligatoires."
+            echo "Pour une sauvegarde manuelle, les options -s et -n sont obligatoires."
             ;;
         $ERROR_AUTOMATIQUE_SOURCE_N_F_OMISSION)
-            echo "Erreur ($ERROR_AUTOMATIQUE_SOURCE_N_F_OMISSION): Pour une sauvegarde automatique, les options -s, -n et -f sont obligatoires."
+            echo "Pour une sauvegarde automatique, les options -s, -n et -f sont obligatoires."
             ;;
         $ERROR_FICHIER_SPECIFIE_INEXISTANT)
-            echo "Erreur ($ERROR_FICHIER_SPECIFIE_INEXISTANT): Le fichier spécifié n'existe pas."
+            echo "Le fichier spécifié n'existe pas."
             ;;
         $ERROR_COMPRESSION_DOSSIER)
-            echo "Erreur ($ERROR_COMPRESSION_DOSSIER): Erreur de la compression du dossier."
+            echo "Erreur de la compression du dossier."
             ;;
         $ERROR_ENVOI_FICHIER_DRIVE)
-            echo "Erreur ($ERROR_ENVOI_FICHIER_DRIVE): Erreur lors de l'envoi du fichier vers Google Drive."
+            echo "Erreur lors de l'envoi du fichier vers Google Drive."
             ;;
         $ERROR_FREQUENCE_SAUV_AUTO_NON_VALIDE)
-            echo "Erreur ($ERROR_FREQUENCE_SAUV_AUTO_NON_VALIDE): Fréquence de sauvegarde automatique non valide. Les options valides sont 'daily' ou 'weekly'."
+            echo "Fréquence de sauvegarde automatique non valide. Les options valides sont 'daily' ou 'weekly'."
             ;;
         $ERROR_AUCUNE_METHODE_SAUV_SPECIFIEE)
-            echo "Erreur ($ERROR_AUCUNE_METHODE_SAUV_SPECIFIEE): Aucune méthode de sauvegarde spécifiée. Veuillez choisir 'manual' ou 'automatic'."
+            echo "Aucune méthode de sauvegarde spécifiée. Veuillez choisir 'manual' ou 'automatic'."
             ;;
         *)
             echo "Erreur inconnue: $error_code"
@@ -100,8 +105,7 @@ handle_error() {
     local error_code=$1
     local error_message=$(error_message "$error_code")
     log_info "$error_message" "ERREUR" "$error_code"
-    echo "$error_message"
-    show_help
+    echo "Erreur ($error_code) : $error_message"
     exit 1
 }
 
@@ -117,7 +121,7 @@ log_info() {
         if [[ $log_type == "ERREUR" ]]; then
             echo "$timestamp : $username : $log_type ($error_code) : $log_message" >> "$log_dir/history.log"
         else
-            echo "$timestamp : $username : $log_type : $log_message" >> "$log_dir/history.log" || { echo "Erreur lors de l'écriture dans le fichier journal."; exit 1; }
+            echo "$timestamp : $username : $log_type ($error_code) : $log_message" >> "$log_dir/history.log" || { echo "Erreur lors de l'écriture dans le fichier journal."; exit 1; }
         fi
     fi
 }
@@ -173,7 +177,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -l|--log)
-            cat "$lgfile"
+            sudo cat "$lgfile"
             exit 0
             ;;
         -h|--help)
@@ -201,7 +205,7 @@ if ! find "$source_file" > /dev/null 2>&1; then
 fi
 
 # changer le token
-ACCESS_TOKEN="ya29.a0AXooCgsZrMnWxOFxzcMoohtidgDC014x_riI5ofzQ2-SOQUGcP4pZUpjNhZ0VAIGirQu5a6lcpVV4Pk5ZBbTs6NI-U6AZKkCuWXXbNYGut2_lGRs2rAfteAhhFnrH24AGpaGM2Ri3gh1KAG1gOIajo0w-lYNbhNZvOc4aCgYKAc8SARASFQHGX2MiaWchNI1wDMUP_YpXl7om6g0171"
+ACCESS_TOKEN="ya29.a0AXooCgseo1_Oq6Ah2DjTjvgnfVHQBgGP3OSGU7_-bd4qh6Ks0PDzRVgfuasF_aKJNGkSH42GgLBvdydodXTRgp5canLkYNBM88C820mNPK3N6uyzECJbGc5kaAAPHY3__CLQXKomQRKlAsCbIAC8UIKDufd21ceUz8UwaCgYKAawSARESFQHGX2MiF4NJ3mKAaXdk04FoFGmVbA0171"
 
 UPLOAD_URL="https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
 
@@ -233,8 +237,8 @@ upload_to_drive() {
         handle_error "$ERROR_ENVOI_FICHIER_DRIVE"
     fi
 
-    echo "Toutes les opérations d'upload vers Google Drive ont été effectuées avec succès."
-    log_info "Toutes les opérations d'upload vers Google Drive ont été effectuées avec succès." "INFOS"
+    echo "Info ($INFO_UPLOAD_SUCCESS) : $INFO_UPLOAD_SUCCESS_MESSAGE"
+    log_info "$INFO_UPLOAD_SUCCESS_MESSAGE" "INFOS" "$INFO_UPLOAD_SUCCESS"
 }
 
 # Main
