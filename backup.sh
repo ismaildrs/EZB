@@ -47,30 +47,65 @@ show_help() {
 error_message() {
     local error_code=$1
     case $error_code in
-        $ERROR_OPTION_NON_EXISTANT)
-            echo "Erreur ($ERROR_OPTION_NON_EXISTANT): Option saisie non existante."
+        $ERROR_OPTION_NON_EXISTANTE)
+            echo "Erreur ($ERROR_OPTION_NON_EXISTANTE): Option saisie non existante."
             ;;
         $ERROR_PARAMETRE_OBLIGATOIRE_MANQUANT)
             echo "Erreur ($ERROR_PARAMETRE_OBLIGATOIRE_MANQUANT): Paramètre obligatoire manquant."
             ;;
-        # Autre erreur à ajouter ...
+        $ERROR_ERREUR_INCONNUE)
+            echo "Erreur inconnue."
+            ;;
+        $ERROR_ECRITURE_FICHIER_JOURNAL)
+            echo "Erreur ($ERROR_ECRITURE_FICHIER_JOURNAL): Erreur lors de l'écriture dans le fichier journal."
+            ;;
+        $ERROR_EXECUTION_SCRIPT_NON_ROOT)
+            echo "Erreur ($ERROR_EXECUTION_SCRIPT_NON_ROOT): Le script doit être exécuté avec sudo ou en tant qu'utilisateur root."
+            ;;
+        $ERROR_OPTION_P_NON_C)
+            echo "Erreur ($ERROR_OPTION_P_NON_C): L'option -p ne peut être utilisée que si l'option -c est spécifiée."
+            ;;
+        $ERROR_OPTION_NON_VALIDE)
+            echo "Erreur ($ERROR_OPTION_NON_VALIDE): Option non valide."
+            ;;
+        $ERROR_MANUEL_SOURCE_N_OMISSION)
+            echo "Erreur ($ERROR_MANUEL_SOURCE_N_OMISSION): Pour une sauvegarde manuelle, les options -s et -n sont obligatoires."
+            ;;
+        $ERROR_AUTOMATIQUE_SOURCE_N_F_OMISSION)
+            echo "Erreur ($ERROR_AUTOMATIQUE_SOURCE_N_F_OMISSION): Pour une sauvegarde automatique, les options -s, -n et -f sont obligatoires."
+            ;;
+        $ERROR_FICHIER_SPECIFIE_INEXISTANT)
+            echo "Erreur ($ERROR_FICHIER_SPECIFIE_INEXISTANT): Le fichier spécifié n'existe pas."
+            ;;
+        $ERROR_COMPRESSION_DOSSIER)
+            echo "Erreur ($ERROR_COMPRESSION_DOSSIER): Erreur de la compression du dossier."
+            ;;
+        $ERROR_ENVOI_FICHIER_DRIVE)
+            echo "Erreur ($ERROR_ENVOI_FICHIER_DRIVE): Erreur lors de l'envoi du fichier vers Google Drive."
+            ;;
+        $ERROR_FREQUENCE_SAUV_AUTO_NON_VALIDE)
+            echo "Erreur ($ERROR_FREQUENCE_SAUV_AUTO_NON_VALIDE): Fréquence de sauvegarde automatique non valide. Les options valides sont 'daily' ou 'weekly'."
+            ;;
+        $ERROR_AUCUNE_METHODE_SAUV_SPECIFIEE)
+            echo "Erreur ($ERROR_AUCUNE_METHODE_SAUV_SPECIFIEE): Aucune méthode de sauvegarde spécifiée. Veuillez choisir 'manual' ou 'automatic'."
+            ;;
         *)
             echo "Erreur inconnue: $error_code"
             ;;
     esac
 }
 
-# pour afficher et sauvgarder les erreurs
+# Function to handle errors
 handle_error() {
-    local error_message="$1"
-    echo "Erreur : $error_message"
-    log_info "$error_message" "ERREUR"
+    local error_code=$1
+    local error_message=$(error_message "$error_code")
+    log_info "$error_message" "ERREUR" "$error_code"
+    echo "$error_message"
     show_help
     exit 1
 }
 
-
-#pour sauvgarder les infos
+# pour afficher et sauvegarder les erreurs
 log_info() {
     local log_message="$1"
     local log_type="$2"
@@ -87,23 +122,20 @@ log_info() {
     fi
 }
 
-
-# pour checker si luser est root
+# Check if the user is root for specific options
 if [ "$(id -u)" -ne 0 ] && [ "$1" == "-m" ]; then
-    handle_error "le script ("$1") doit être exécuté avec sudo ou en tant qu'utilisateur root."
+    handle_error "$ERROR_EXECUTION_SCRIPT_NON_ROOT"
 fi
 if [ "$(id -u)" -ne 0 ] && [ "$1" == "-a" ] ; then
-    handle_error "le script ("$1") doit être exécuté avec sudo ou en tant qu'utilisateur root."
+    handle_error "$ERROR_EXECUTION_SCRIPT_NON_ROOT"
 fi
 
-
-# pour donner au moins une options
+# Check if at least one option is provided
 if [ "$#" -eq 0 ]; then
-    handle_error "Aucune option n'a été spécifiée. Veuillez spécifier au moins une option."
+    handle_error "$ERROR_OPTION_NON_EXISTANTE"
 fi
 
-
-# pour verifier les options
+# Verify options
 while [[ $# -gt 0 ]]; do
     key="$1"
 
@@ -133,15 +165,13 @@ while [[ $# -gt 0 ]]; do
                 password="$2"
                 shift 2
             else
-                handle_error "L'option -p ne peut être utilisée que si l'option -c est spécifiée."
+                handle_error "$ERROR_OPTION_P_NON_C"
             fi
             ;;
         -f|--frequency)
             frequency="$2"
             shift 2
             ;;
-
-        # a fixer
         -l|--log)
             cat "$lgfile"
             exit 0
@@ -151,35 +181,31 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            handle_error "Option non valide: $1"
+            handle_error "$ERROR_OPTION_NON_VALIDE"
             ;;
     esac
 done
 
-
+# Check backup options
 if $manual_backup && [[ -z $source_file || -z $file_name ]]; then
-    handle_error "Pour une sauvegarde manuelle, les options -s et -n sont obligatoires."
+    handle_error "$ERROR_MANUEL_SOURCE_N_OMISSION"
 fi
-
 
 if $automatic_backup && [[ -z $source_file || -z $file_name || -z $frequency ]]; then
-    handle_error "Pour une sauvegarde automatique, les options -s, -n et -f sont obligatoires."
+    handle_error "$ERROR_AUTOMATIQUE_SOURCE_N_F_OMISSION"
 fi
 
-
+# Check if specified file exists
 if ! find "$source_file" > /dev/null 2>&1; then
-    handle_error "Le fichier spécifié n'existe pas."
+    handle_error "$ERROR_FICHIER_SPECIFIE_INEXISTANT"
 fi
-
 
 # changer le token
 ACCESS_TOKEN="ya29.a0AXooCgsZrMnWxOFxzcMoohtidgDC014x_riI5ofzQ2-SOQUGcP4pZUpjNhZ0VAIGirQu5a6lcpVV4Pk5ZBbTs6NI-U6AZKkCuWXXbNYGut2_lGRs2rAfteAhhFnrH24AGpaGM2Ri3gh1KAG1gOIajo0w-lYNbhNZvOc4aCgYKAc8SARASFQHGX2MiaWchNI1wDMUP_YpXl7om6g0171"
 
 UPLOAD_URL="https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
 
-
-# fonction d'upload utilise curl
-#(change it to be able to save normal -first if- folders and zipped folders)
+# Function to upload files using curl
 upload_to_drive() {
     local source="$1"
     local name="$2"
@@ -189,9 +215,9 @@ upload_to_drive() {
     if $compress; then
         if [[ -d $source ]]; then
             if [ -n "$password" ]; then
-                zip -re "$source.zip" "$source" -P "$password" || handle_error "Erreur de la compression du dossier."
+                zip -re "$source.zip" "$source" -P "$password" || handle_error "$ERROR_COMPRESSION_DOSSIER"
             else
-                zip -r "$source.zip" "$source" || handle_error "Erreur la compression du dossier."
+                zip -r "$source.zip" "$source" || handle_error "$ERROR_COMPRESSION_DOSSIER"
             fi
             source="$source.zip"
         fi
@@ -203,26 +229,19 @@ upload_to_drive() {
         -F "file=@$source;type=application/zip" \
         "$UPLOAD_URL")
 
-    
-
     if [ $? -ne 0 ]; then
-        handle_error "Erreur lors de l'envoi du fichier vers Google Drive."
+        handle_error "$ERROR_ENVOI_FICHIER_DRIVE"
     fi
 
     echo "Toutes les opérations d'upload vers Google Drive ont été effectuées avec succès."
     log_info "Toutes les opérations d'upload vers Google Drive ont été effectuées avec succès." "INFOS"
 }
 
-
-
 # Main
 
-# working
 if $manual_backup; then
     echo "Début de la sauvegarde manuelle..."
     upload_to_drive "$source_file" "$file_name" "$compress" "$password"
-
-# pas encore tester
 elif $automatic_backup; then
     echo "La sauvegarde automatique est activée. Fréquence: $frequency"
 
@@ -234,7 +253,7 @@ elif $automatic_backup; then
             cron_schedule="0 12 * * 1"
             ;;
         *)
-            handle_error "Fréquence de sauvegarde automatique non valide. Les options valides sont 'daily' ou 'weekly'."
+            handle_error "$ERROR_FREQUENCE_SAUV_AUTO_NON_VALIDE"
             ;;
     esac
 
@@ -246,11 +265,8 @@ elif $automatic_backup; then
 
     echo "Tâche de sauvegarde automatique ajoutée avec succès pour exécuter chaque jour à midi."
 else
-    handle_error "Aucune méthode de sauvegarde spécifiée. Veuillez choisir 'manual' ou 'automatic'."
+    handle_error "$ERROR_AUCUNE_METHODE_SAUV_SPECIFIEE"
 fi
-
-
 # verification de token si il est expire - gestion erreur
 # automatique a verifier
 # log file a verifier
-# 
