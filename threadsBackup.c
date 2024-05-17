@@ -13,7 +13,7 @@
 void *backup_file(void *file_name) {
     char* file_path = (char *)file_name;
     // Command to execute backup.sh with arguments
-    char* args[] = {"sudo", "./backup.sh", "-m", "-s", file_path, "-n", file_path, NULL};
+    char* args[] = {"sudo", "backup.sh", "-m", "-s", file_path, "-n", file_path, NULL};
     execvp(args[0], args);
     perror("Exec failed");
     pthread_exit(NULL);

@@ -10,7 +10,7 @@
 // Function to backup a file
 void backup_file(char* file_name) {
     // Command to execute backup.sh with arguments
-    char* args[] = {"sudo", "./backup.sh", "-m", "-s", file_name, "-n", file_name, NULL};
+    char* args[] = {"sudo", "backup.sh", "-m", "-s", file_name, "-n", file_name, NULL};
     execvp(args[0], args);
     perror("Exec failed");
     exit(EXIT_FAILURE);

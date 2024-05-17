@@ -1,0 +1,6 @@
+threads: sudo backup.sh -m -t -s ismailtests -n test
+fork: sudo backup.sh -m -fo -s ismailtests -n test
+manual: sudo backup.sh -m -s ismailtests -n test
+automatic: sudo backup.sh -a -s ismailtests -n test -f everyminute
+help: ./backup.sh -h
+log: ./backup.sh -lclea
