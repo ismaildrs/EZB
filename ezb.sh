@@ -350,10 +350,10 @@ authorize_account
 if $manual_backup; then
     if $forked_backup; then
         echo "Début de la sauvegarde manuelle parallèle..."
-        backup "$source_file"
+        ezbFork "$source_file"
     elif $use_threads; then
         echo "Début de la sauvegarde manuelle parallèle avec les threads..."
-        backup2 "$source_file"
+        ezbThread "$source_file"
     else
         echo "Début de la sauvegarde manuelle sans compression..."
         upload_to_b2 "$source_file" "$file_name"
