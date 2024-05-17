@@ -1,7 +1,7 @@
 history.log
 backup2.c
-/ismailtests
-/.vscode
+ismailtests/
+.vscode/
 restoreFile.log
 test.txt
 commands
