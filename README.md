@@ -1,6 +1,6 @@
 # EZB (Easy Backup) Command Line Tool
 
-![EZB LOGO](ezb_logo.jpg)
+![EZB LOGO](ezb_logo.png)
 
 EZB is a command-line tool designed to simplify backing up files to Backblaze B2 cloud storage. It supports various backup functionalities including automatic, threaded, and forked backups.
 
@@ -111,10 +111,6 @@ For more detailed usage and options, refer to the help command:
 ```sh
 ezb -h
 ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
