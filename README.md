@@ -8,7 +8,7 @@ EZB is a command-line tool designed to simplify backing up files to Backblaze B2
 
 To install EZB, run the following command:
 ```sh
-chmod +x ezb
+chmod +x ./ezb.sh
 sudo ./ezb.sh -i
 ```
 
